@@ -1,24 +1,18 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const userRoutes = require('./src/routes/userRoutes.js');
+const studentRoutes = require('./src/routes/studentRoutes.js')
+const authRoutes = require('./src/routes/authRoutes.js')
+const protectedRoutes = require('./src/routes/protectedRoutes.js')
 
-const { Sequelize } = require('sequelize');
+app.use(express.json());
 
-const sequelize = new Sequelize('superset_clone', 'root', 'password', {
-    host: 'localhost',
-    dialect: 'mysql'
+// Use routes
+// app.use('/api', userRoutes);
+app.use('/api', protectedRoutes);
+app.use('/api/auth', authRoutes);
+
+
+app.listen(5001, () => {
+    console.log('Server running on port 5001');
 });
-
-sequelize.authenticate()
-    .then(() => console.log('Database connected'))
-    .catch(err => console.log('Error: ' + err));
-
-
-app.get('/', (req, res) => res.send('Checking Backend live'));
-
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
