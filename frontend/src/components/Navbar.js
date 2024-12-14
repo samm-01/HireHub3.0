@@ -13,16 +13,16 @@ const Navbar = () => {
                 {/* Navigation Links */}
                 <div className="flex space-x-6">
                     <Link
-                        to="/contact"
+                        to="/contact-sales"
                         className="text-lg hover:text-secondary transition-all"
                     >
-                        Contact
+                        Contact Sales
                     </Link>
                     <Link
-                        to="/sales"
+                        to="/student-help"
                         className="text-lg hover:text-secondary transition-all"
                     >
-                        Sales
+                        Student Help
                     </Link>
                     <Link
                         to="/blog"

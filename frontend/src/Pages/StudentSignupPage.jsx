@@ -16,6 +16,38 @@ const StudentSignup = () => {
         }
     };
 
+    const [gender, setGender] = useState(null);
+    const [formData, setFormData] = useState({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        dateOfBirth: '',
+        gender: '',
+        college: '',
+        rollNumber: '',
+        email: '',
+        mobile: '',
+        countryCode: '+91',
+        password: '',
+        confirmPassword: '',
+        agreedToTerms: false,
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value,
+        });
+    };
+
+    const handleGenderSelect = (selectedGender) => {
+        setGender(selectedGender);
+        setFormData({ ...formData, gender: selectedGender });
+    };
+
+
+
     return (
         <div className="min-h-screen flex">
             {/* Sidebar */}
@@ -65,25 +97,36 @@ const StudentSignup = () => {
                     <form className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Full Name</label>
+                                <label className="block text-textDark font-medium mb-2">First Name</label>
                                 <input
                                     type="text"
+                                    name="firstName"
                                     placeholder="First Name"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
+                                <label className="block text-textDark font-medium mb-2">Middle Name</label>
                                 <input
                                     type="text"
+                                    name="middleName"
                                     placeholder="Middle Name"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.middleName}
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
+                                <label className="block text-textDark font-medium mb-2">Last Name</label>
                                 <input
                                     type="text"
+                                    name="lastName"
                                     placeholder="Last Name"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
                                 />
                             </div>
                         </div>
@@ -95,7 +138,10 @@ const StudentSignup = () => {
                                     <FaCalendarAlt className="absolute top-3 left-3 text-gray-400" />
                                     <input
                                         type="date"
+                                        name="dateOfBirth"
                                         className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                        value={formData.dateOfBirth}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
@@ -103,9 +149,16 @@ const StudentSignup = () => {
                             <div>
                                 <label className="block text-textDark font-medium mb-2">Gender</label>
                                 <div className="flex space-x-4">
-                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Male</button>
-                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Female</button>
-                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Other</button>
+                                    {['Male', 'Female', 'Other'].map((g) => (
+                                        <button
+                                            key={g}
+                                            type="button"
+                                            className={`p-3 w-full border border-gray-300 rounded-lg ${gender === g ? 'bg-secondary text-white' : ''}`}
+                                            onClick={() => handleGenderSelect(g)}
+                                        >
+                                            {g}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
@@ -115,10 +168,27 @@ const StudentSignup = () => {
                                     <FaUniversity className="absolute top-3 left-3 text-gray-400" />
                                     <input
                                         type="text"
+                                        name="college"
                                         placeholder="Enter your college name"
                                         className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                        value={formData.college}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Institute Roll Number</label>
+                                <input
+                                    type="text"
+                                    name="rollNumber"
+                                    placeholder="Enter your roll number"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.rollNumber}
+                                    onChange={handleInputChange}
+                                />
                             </div>
                         </div>
                     </form>
@@ -127,26 +197,65 @@ const StudentSignup = () => {
                     <form className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Primary Email</label>
+                                <label className="block text-textDark font-medium mb-2">Email Address</label>
                                 <div className="relative">
                                     <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
                                     <input
                                         type="email"
-                                        placeholder="Enter your primary email"
+                                        name="email"
+                                        placeholder="Enter your email address"
                                         className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
+
                             <div>
                                 <label className="block text-textDark font-medium mb-2">Mobile Number</label>
-                                <div className="relative">
-                                    <FaPhone className="absolute top-3 left-3 text-gray-400" />
+                                <div className="flex">
                                     <input
                                         type="text"
-                                        placeholder="Enter your mobile number"
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                        name="countryCode"
+                                        placeholder="Country Code"
+                                        className="w-1/4 p-3 border border-gray-300 rounded-lg"
+                                        value={formData.countryCode}
+                                        onChange={handleInputChange}
+                                    />
+                                    <input
+                                        type="text"
+                                        name="mobile"
+                                        placeholder="Mobile Number"
+                                        className="w-3/4 p-3 border border-gray-300 rounded-lg"
+                                        value={formData.mobile}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Confirm Password</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
+                                />
                             </div>
                         </div>
                     </form>
@@ -250,3 +359,4 @@ const StudentSignup = () => {
 };
 
 export default StudentSignup;
+
