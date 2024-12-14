@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FaUser, FaCalendarAlt, FaUniversity, FaExclamationCircle, FaCheckCircle, FaPhone, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 
 const StudentSignup = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -39,6 +41,12 @@ const StudentSignup = () => {
         endDate: '',
         grade: '',
         modeOfStudy: '',
+        // Step 5 fields
+        resume: null,
+        profilePicture: null,
+        academicCertificates: [],
+        idProof: null,
+        otherDocuments: [],
     });
 
     const handleInputChange = (e) => {
@@ -54,6 +62,24 @@ const StudentSignup = () => {
         setFormData({ ...formData, gender: selectedGender });
     };
 
+    const handleFileUpload = (e, fieldName) => {
+        const file = e.target.files;
+        if (fieldName === 'academicCertificates' || fieldName === 'otherDocuments') {
+            // For multiple files
+            setFormData({
+                ...formData,
+                [fieldName]: [...file],
+            });
+        } else {
+            // For single files
+            setFormData({
+                ...formData,
+                [fieldName]: file[0],
+            });
+        }
+    };
+
+    const navigate = useNavigate();
 
 
     return (
@@ -370,32 +396,198 @@ const StudentSignup = () => {
 
                 {currentStep === 4 && (
                     <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Work Experience</label>
-                                <textarea
-                                    placeholder="Describe your work experience"
+                                <label className="block text-textDark font-medium mb-2">Job Title/Role</label>
+                                <input
+                                    type="text"
+                                    name="jobTitle"
+                                    placeholder="Enter your job title"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
-                                    rows="5"
-                                ></textarea>
+                                    value={formData.jobTitle || ''}
+                                    onChange={handleInputChange}
+                                />
                             </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Company Name</label>
+                                <input
+                                    type="text"
+                                    name="companyName"
+                                    placeholder="Enter your company name"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.companyName || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Employment Type</label>
+                                <select
+                                    name="employmentType"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.employmentType || ''}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="" disabled>Select employment type</option>
+                                    <option value="Full-time">Full-time</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Internship">Internship</option>
+                                    <option value="Freelance">Freelance</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Location</label>
+                                <input
+                                    type="text"
+                                    name="location"
+                                    placeholder="City or Remote"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.location || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Start Date</label>
+                                <input
+                                    type="date"
+                                    name="workStartDate"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.workStartDate || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">End Date</label>
+                                <input
+                                    type="date"
+                                    name="workEndDate"
+                                    className={`w-full p-3 border border-gray-300 rounded-lg ${formData.currentlyWorking ? 'bg-gray-200 cursor-not-allowed' : ''}`}
+                                    value={formData.workEndDate || ''}
+                                    onChange={handleInputChange}
+                                    disabled={formData.currentlyWorking}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                name="currentlyWorking"
+                                className="h-5 w-5 border border-gray-300 rounded-lg"
+                                checked={formData.currentlyWorking || false}
+                                onChange={handleInputChange}
+                            />
+                            <label className="text-textDark">I am currently working here</label>
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Job Responsibilities</label>
+                            <textarea
+                                name="jobResponsibilities"
+                                placeholder="Briefly describe your responsibilities or achievements"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                rows="4"
+                                value={formData.jobResponsibilities || ''}
+                                onChange={handleInputChange}
+                            ></textarea>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                className="bg-secondary text-white py-2 px-6 rounded-lg"
+                                onClick={() => alert('Add more experience functionality coming soon!')}
+                            >
+                                Add More Experience
+                            </button>
                         </div>
                     </form>
                 )}
 
+
                 {currentStep === 5 && (
                     <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Upload Documents</label>
-                                <input
-                                    type="file"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Resume/CV</label>
+                            <input
+                                type="file"
+                                name="resume"
+                                accept=".pdf,.doc,.docx"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                onChange={(e) => handleFileUpload(e, 'resume')}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Profile Picture</label>
+                            <input
+                                type="file"
+                                name="profilePicture"
+                                accept="image/*"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                onChange={(e) => handleFileUpload(e, 'profilePicture')}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Academic Certificates</label>
+                            <input
+                                type="file"
+                                name="academicCertificates"
+                                accept=".pdf,.jpg,.png"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                multiple
+                                onChange={(e) => handleFileUpload(e, 'academicCertificates')}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Government ID Proof</label>
+                            <input
+                                type="file"
+                                name="idProof"
+                                accept=".pdf,.jpg,.png"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                onChange={(e) => handleFileUpload(e, 'idProof')}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Other Documents</label>
+                            <input
+                                type="file"
+                                name="otherDocuments"
+                                accept=".pdf,.jpg,.png"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                multiple
+                                onChange={(e) => handleFileUpload(e, 'otherDocuments')}
+                            />
+                        </div>
+
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                className="bg-primary text-white py-2 px-6 rounded-lg"
+                                onClick={() => {
+                                    alert('Documents uploaded successfully! Redirecting to login page...');
+                                    navigate('/login');
+                                }}
+                            >
+                                Upload Documents
+                            </button>
                         </div>
                     </form>
                 )}
+
+
 
                 {/* Navigation Buttons */}
                 <div className="mt-8 flex justify-between">
@@ -438,7 +630,7 @@ const StudentSignup = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
