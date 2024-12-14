@@ -31,6 +31,14 @@ const StudentSignup = () => {
         password: '',
         confirmPassword: '',
         agreedToTerms: false,
+        // Step 3 fields
+        educationLevel: '',
+        fieldOfStudy: '',
+        institutionName: '',
+        startDate: '',
+        endDate: '',
+        grade: '',
+        modeOfStudy: '',
     });
 
     const handleInputChange = (e) => {
@@ -265,24 +273,100 @@ const StudentSignup = () => {
                     <form className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Program</label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter your program"
+                                <label className="block text-textDark font-medium mb-2">Education Level</label>
+                                <select
+                                    name="educationLevel"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
-                                />
+                                    value={formData.educationLevel || ''}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="" disabled>Select your education level</option>
+                                    <option value="Bachelors">Bachelor’s</option>
+                                    <option value="Masters">Master’s</option>
+                                    <option value="PhD">PhD</option>
+                                </select>
                             </div>
+
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Batch</label>
+                                <label className="block text-textDark font-medium mb-2">Field of Study</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter your batch"
+                                    name="fieldOfStudy"
+                                    placeholder="Enter your field of study"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.fieldOfStudy || ''}
+                                    onChange={handleInputChange}
                                 />
                             </div>
                         </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Institution Name</label>
+                                <input
+                                    type="text"
+                                    name="institutionName"
+                                    placeholder="Enter your institution name"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.institutionName || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Mode of Study</label>
+                                <select
+                                    name="modeOfStudy"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.modeOfStudy || ''}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="" disabled>Select mode of study</option>
+                                    <option value="Full-time">Full-time</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Distance Learning">Distance Learning</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Start Date</label>
+                                <input
+                                    type="date"
+                                    name="startDate"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.startDate || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">End Date (or Expected)</label>
+                                <input
+                                    type="date"
+                                    name="endDate"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.endDate || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-textDark font-medium mb-2">Grade/CGPA (Optional)</label>
+                            <input
+                                type="text"
+                                name="grade"
+                                placeholder="Enter your grade or CGPA"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                value={formData.grade || ''}
+                                onChange={handleInputChange}
+                            />
+                        </div>
                     </form>
                 )}
+
 
                 {currentStep === 4 && (
                     <form className="space-y-6">
