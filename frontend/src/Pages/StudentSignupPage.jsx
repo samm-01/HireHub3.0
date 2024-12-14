@@ -1,0 +1,252 @@
+import React, { useState } from 'react';
+import { FaUser, FaCalendarAlt, FaUniversity, FaExclamationCircle, FaCheckCircle, FaPhone, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+
+const StudentSignup = () => {
+    const [currentStep, setCurrentStep] = useState(1);
+
+    const handleNextStep = () => {
+        if (currentStep < 5) {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
+    const handlePreviousStep = () => {
+        if (currentStep > 1) {
+            setCurrentStep(currentStep - 1);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex">
+            {/* Sidebar */}
+            <div className="bg-primary text-white w-1/4 p-6">
+                <h2 className="text-2xl font-bold mb-8">Signup Steps</h2>
+                <ul className="space-y-6">
+                    {['Basic Details', 'Contact Details', 'Education Details', 'Work Experience', 'Documents'].map((step, index) => (
+                        <li
+                            key={index}
+                            className={`flex items-center space-x-3 ${currentStep === index + 1 ? 'text-secondary' : 'text-gray-400'}`}
+                        >
+                            <div
+                                className={`w-6 h-6 flex items-center justify-center rounded-full font-bold ${currentStep === index + 1 ? 'bg-secondary' : 'bg-gray-500'
+                                    }`}
+                            >
+                                {currentStep > index + 1 ? <FaCheckCircle /> : index + 1}
+                            </div>
+                            <span>{step}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Form Section */}
+            <div className="w-3/4 bg-gray-100 p-8">
+                <h1 className="text-3xl font-bold text-primary mb-4">
+                    Step {currentStep}: {
+                        currentStep === 1
+                            ? 'Basic Details'
+                            : currentStep === 2
+                                ? 'Contact Details'
+                                : currentStep === 3
+                                    ? 'Education Details'
+                                    : currentStep === 4
+                                        ? 'Work Experience'
+                                        : 'Documents'
+                    }
+                </h1>
+                <p className="text-textDark mb-8">
+                    {currentStep === 1
+                        ? "Let’s get you started!"
+                        : "Please provide the required information to proceed."}
+                </p>
+
+                {/* Form Content */}
+                {currentStep === 1 && (
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Full Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="First Name"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="text"
+                                    placeholder="Middle Name"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="text"
+                                    placeholder="Last Name"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Date of Birth</label>
+                                <div className="relative">
+                                    <FaCalendarAlt className="absolute top-3 left-3 text-gray-400" />
+                                    <input
+                                        type="date"
+                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Gender</label>
+                                <div className="flex space-x-4">
+                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Male</button>
+                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Female</button>
+                                    <button className="p-3 w-full border border-gray-300 rounded-lg">Other</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">College</label>
+                                <div className="relative">
+                                    <FaUniversity className="absolute top-3 left-3 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter your college name"
+                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                )}
+                {currentStep === 2 && (
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Primary Email</label>
+                                <div className="relative">
+                                    <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your primary email"
+                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Mobile Number</label>
+                                <div className="relative">
+                                    <FaPhone className="absolute top-3 left-3 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter your mobile number"
+                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                )}
+
+                {currentStep === 3 && (
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Program</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter your program"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Batch</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter your batch"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
+                    </form>
+                )}
+
+                {currentStep === 4 && (
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Work Experience</label>
+                                <textarea
+                                    placeholder="Describe your work experience"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    rows="5"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </form>
+                )}
+
+                {currentStep === 5 && (
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Upload Documents</label>
+                                <input
+                                    type="file"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                        </div>
+                    </form>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="mt-8 flex justify-between">
+                    {currentStep > 1 && (
+                        <button
+                            onClick={handlePreviousStep}
+                            className="bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all"
+                        >
+                            Previous
+                        </button>
+                    )}
+                    {currentStep < 5 && (
+                        <button
+                            onClick={handleNextStep}
+                            className="bg-primary text-white py-3 px-6 rounded-lg hover:bg-secondary transition-all"
+                        >
+                            Save & Next
+                        </button>
+                    )}
+                </div>
+
+                {/* Attention Box */}
+                {currentStep === 1 && (
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-8">
+                        <div className="flex items-center">
+                            <FaExclamationCircle className="text-yellow-500 text-2xl mr-4" />
+                            <h3 className="font-bold text-yellow-600">ATTENTION!!</h3>
+                        </div>
+                        <p className="text-yellow-600 mt-2">
+                            Registering with an incorrect college can get you disqualified or blacklisted by companies.
+                            Please ensure you select the correct college from the list.
+                        </p>
+                        <ul className="text-yellow-600 mt-2 list-disc pl-6">
+                            <li>Do not choose a college you are not studying in.</li>
+                            <li>Falsifying your college name may lead to disqualification.</li>
+                        </ul>
+                        <p className="text-yellow-600 mt-2">
+                            Once selected, the college name cannot be changed after proceeding.
+                        </p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default StudentSignup;
