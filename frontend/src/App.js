@@ -4,7 +4,6 @@ import './styles/tailwind.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Dashboard from './Pages/Dashboard';
 import Login from './Pages/Login';
-import Profile from './Pages/Profile';
 import Jobs from './Pages/Jobs';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -12,12 +11,15 @@ import StudentAuthPage from './Pages/StudentAuthPage';
 import StudentInfo from './Pages/StudentInfoPage';
 import StudentSignup from './Pages/StudentSignupPage';
 import StudentDashboard from './Pages/StudentDashboard';
+import JobProfiles from './Pages/JobProfiles';
+import StudentProfile from './Pages/StudentProfile';
+
 
 const App = () => {
   const location = useLocation();
 
   // Pages where Navbar should not be displayed
-  const hideNavbarRoutes = ['/student-dashboard'];
+  const hideNavbarRoutes = ['/student-dashboard', '/job-profiles', '/my-profile'];
 
   return (
     <>
@@ -26,12 +28,13 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/student-auth" element={<StudentAuthPage />} />
         <Route path="/student-info" element={<StudentInfo />} />
         <Route path="/student-signup" element={<StudentSignup />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/job-profiles" element={<JobProfiles />} />
+        <Route path="/my-profile" element={<StudentProfile />} />
       </Routes>
       <Footer />
     </>

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { FaUser, FaCalendarAlt, FaUniversity, FaExclamationCircle, FaCheckCircle, FaPhone, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaUniversity, FaExclamationCircle, FaCheckCircle, FaEnvelope } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 
 const StudentSignup = () => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
+    const navigate = useNavigate();
+
+
 
     const handleNextStep = () => {
         if (currentStep < 5) {
             setCurrentStep(currentStep + 1);
         }
+
     };
 
     const handlePreviousStep = () => {
@@ -63,23 +71,77 @@ const StudentSignup = () => {
     };
 
     const handleFileUpload = (e, fieldName) => {
-        const file = e.target.files;
+        const files = e.target.files;
         if (fieldName === 'academicCertificates' || fieldName === 'otherDocuments') {
             // For multiple files
             setFormData({
                 ...formData,
-                [fieldName]: [...file],
+                [fieldName]: Array.from(files),
             });
         } else {
             // For single files
             setFormData({
                 ...formData,
-                [fieldName]: file[0],
+                [fieldName]: files[0],
             });
         }
     };
 
-    const navigate = useNavigate();
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.firstName) errors.firstName = 'First name is required';
+        if (!formData.lastName) errors.lastName = 'Last name is required';
+        if (!formData.email) errors.email = 'Email is required';
+        if (!formData.password) errors.password = 'Password is required';
+        if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+        if (!formData.agreedToTerms) errors.agreedToTerms = 'You must agree to the terms and conditions';
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log('Submit button clicked');
+        setError(null);
+        setSuccess(null);
+
+        // Validate the form
+        if (!validateForm()) return;
+
+        try {
+            // Concatenate names
+            const fullName = `${formData.firstName} ${formData.middleName} ${formData.lastName}`.trim();
+
+            // Create a payload object
+            const payload = {
+                ...formData,
+                fullName, // Add concatenated fullName
+
+            };
+            console.log('Payload being sent:', payload);
+
+
+            // Remove individual name fields as they're not needed
+            delete payload.firstName;
+            delete payload.middleName;
+            delete payload.lastName;
+
+            // Send the data to the backend
+            const response = await axios.post('http://localhost:5001/api/students/signup', payload, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (response.status === 201) {
+                setSuccess('Signup successful! Redirecting to login page...');
+                setTimeout(() => navigate('/login'), 3000);
+            }
+        } catch (error) {
+            console.error('Error sending data to backend:', error.response?.data || error.message);
+            setError(error.response?.data?.message || 'Signup failed. Please try again.');
+        }
+    };
 
 
     return (
@@ -127,487 +189,522 @@ const StudentSignup = () => {
                 </p>
 
                 {/* Form Content */}
-                {currentStep === 1 && (
-                    <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">First Name</label>
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    placeholder="First Name"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.firstName}
-                                    onChange={handleInputChange}
-                                />
+                <form onSubmit={handleSubmit}>
+                    {currentStep === 1 && (
+                        <div className="space-y-6" >
+                            {formErrors.firstName && <p className="text-red-500">{formErrors.firstName}</p>}
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">First Name</label>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        placeholder="First Name"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Middle Name</label>
+                                    <input
+                                        type="text"
+                                        name="middleName"
+                                        placeholder="Middle Name"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.middleName}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Last Name</label>
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        placeholder="Last Name"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Middle Name</label>
-                                <input
-                                    type="text"
-                                    name="middleName"
-                                    placeholder="Middle Name"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.middleName}
-                                    onChange={handleInputChange}
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Date of Birth</label>
+                                    <div className="relative">
+                                        <FaCalendarAlt className="absolute top-3 left-3 text-gray-400" />
+                                        <input
+                                            type="date"
+                                            name="dateOfBirth"
+                                            className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                            value={formData.dateOfBirth}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Gender</label>
+                                    <div className="flex space-x-4">
+                                        {['Male', 'Female', 'Other'].map((g) => (
+                                            <button
+                                                key={g}
+                                                type="button"
+                                                className={`p-3 w-full border border-gray-300 rounded-lg ${gender === g ? 'bg-secondary text-white' : ''}`}
+                                                onClick={() => handleGenderSelect(g)}
+                                                required
+                                            >
+                                                {g}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">College</label>
+                                    <div className="relative">
+                                        <FaUniversity className="absolute top-3 left-3 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            name="college"
+                                            placeholder="Enter your college name"
+                                            className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                            value={formData.college}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Last Name</label>
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    placeholder="Last Name"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.lastName}
-                                    onChange={handleInputChange}
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Institute Roll Number</label>
+                                    <input
+                                        type="text"
+                                        name="rollNumber"
+                                        placeholder="Enter your roll number"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.rollNumber}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
+                    )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Date of Birth</label>
-                                <div className="relative">
-                                    <FaCalendarAlt className="absolute top-3 left-3 text-gray-400" />
+                    {currentStep === 2 && (
+                        <div className="space-y-6" >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Email Address</label>
+                                    <div className="relative">
+                                        <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="Enter your email address"
+                                            className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Mobile Number</label>
+                                    <div className="flex">
+                                        <input
+                                            type="text"
+                                            name="countryCode"
+                                            placeholder="Country Code"
+                                            className="w-1/4 p-3 border border-gray-300 rounded-lg"
+                                            value={formData.countryCode}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            name="mobile"
+                                            placeholder="Mobile Number"
+                                            className="w-3/4 p-3 border border-gray-300 rounded-lg"
+                                            value={formData.mobile}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Enter your password"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Confirm Password</label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="Confirm your password"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {currentStep === 3 && (
+                        <div className="space-y-6" >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Education Level</label>
+                                    <select
+                                        name="educationLevel"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.educationLevel || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        <option value="" disabled>Select your education level</option>
+                                        <option value="Bachelors">Bachelor’s</option>
+                                        <option value="Masters">Master’s</option>
+                                        <option value="PhD">PhD</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Field of Study</label>
+                                    <input
+                                        type="text"
+                                        name="fieldOfStudy"
+                                        placeholder="Enter your field of study"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.fieldOfStudy || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Institution Name</label>
+                                    <input
+                                        type="text"
+                                        name="institutionName"
+                                        placeholder="Enter your institution name"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.institutionName || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Mode of Study</label>
+                                    <select
+                                        name="modeOfStudy"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.modeOfStudy || ''}
+                                        onChange={handleInputChange}
+                                        required                                >
+                                        <option value="" disabled>Select mode of study</option>
+                                        <option value="Full-time">Full-time</option>
+                                        <option value="Part-time">Part-time</option>
+                                        <option value="Distance Learning">Distance Learning</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Start Date</label>
                                     <input
                                         type="date"
-                                        name="dateOfBirth"
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
-                                        value={formData.dateOfBirth}
+                                        name="startDate"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.startDate || ''}
                                         onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">End Date (or Expected)</label>
+                                    <input
+                                        type="date"
+                                        name="endDate"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.endDate || ''}
+                                        onChange={handleInputChange}
+                                        required
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Gender</label>
-                                <div className="flex space-x-4">
-                                    {['Male', 'Female', 'Other'].map((g) => (
-                                        <button
-                                            key={g}
-                                            type="button"
-                                            className={`p-3 w-full border border-gray-300 rounded-lg ${gender === g ? 'bg-secondary text-white' : ''}`}
-                                            onClick={() => handleGenderSelect(g)}
-                                        >
-                                            {g}
-                                        </button>
-                                    ))}
-                                </div>
+                                <label className="block text-textDark font-medium mb-2">Grade/CGPA (Optional)</label>
+                                <input
+                                    type="text"
+                                    name="grade"
+                                    placeholder="Enter your grade or CGPA"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    value={formData.grade || ''}
+                                    onChange={handleInputChange}
+                                    required
+                                />
                             </div>
+                        </div>
+                    )}
 
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">College</label>
-                                <div className="relative">
-                                    <FaUniversity className="absolute top-3 left-3 text-gray-400" />
+
+                    {currentStep === 4 && (
+                        <div className="space-y-6" >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Job Title/Role</label>
                                     <input
                                         type="text"
-                                        name="college"
-                                        placeholder="Enter your college name"
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
-                                        value={formData.college}
+                                        name="jobTitle"
+                                        placeholder="Enter your job title"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.jobTitle || ''}
                                         onChange={handleInputChange}
                                     />
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Institute Roll Number</label>
-                                <input
-                                    type="text"
-                                    name="rollNumber"
-                                    placeholder="Enter your roll number"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.rollNumber}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-                    </form>
-                )}
-                {currentStep === 2 && (
-                    <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Email Address</label>
-                                <div className="relative">
-                                    <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        placeholder="Enter your email address"
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Mobile Number</label>
-                                <div className="flex">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Company Name</label>
                                     <input
                                         type="text"
-                                        name="countryCode"
-                                        placeholder="Country Code"
-                                        className="w-1/4 p-3 border border-gray-300 rounded-lg"
-                                        value={formData.countryCode}
-                                        onChange={handleInputChange}
-                                    />
-                                    <input
-                                        type="text"
-                                        name="mobile"
-                                        placeholder="Mobile Number"
-                                        className="w-3/4 p-3 border border-gray-300 rounded-lg"
-                                        value={formData.mobile}
+                                        name="companyName"
+                                        placeholder="Enter your company name"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.companyName || ''}
                                         onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Password</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Employment Type</label>
+                                    <select
+                                        name="employmentType"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.employmentType || ''}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="" disabled>Select employment type</option>
+                                        <option value="Full-time">Full-time</option>
+                                        <option value="Part-time">Part-time</option>
+                                        <option value="Internship">Internship</option>
+                                        <option value="Freelance">Freelance</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Location</label>
+                                    <input
+                                        type="text"
+                                        name="location"
+                                        placeholder="City or Remote"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.location || ''}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">Start Date</label>
+                                    <input
+                                        type="date"
+                                        name="workStartDate"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.workStartDate || ''}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-textDark font-medium mb-2">End Date</label>
+                                    <input
+                                        type="date"
+                                        name="workEndDate"
+                                        className={`w-full p-3 border border-gray-300 rounded-lg ${formData.currentlyWorking ? 'bg-gray-200 cursor-not-allowed' : ''}`}
+                                        value={formData.workEndDate || ''}
+                                        onChange={handleInputChange}
+                                        disabled={formData.currentlyWorking}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
                                 <input
-                                    type="password"
-                                    name="password"
-                                    placeholder="Enter your password"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.password}
+                                    type="checkbox"
+                                    name="currentlyWorking"
+                                    className="h-5 w-5 border border-gray-300 rounded-lg"
+                                    checked={formData.currentlyWorking || false}
                                     onChange={handleInputChange}
                                 />
+                                <label className="text-textDark">I am currently working here</label>
                             </div>
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Confirm Password</label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    placeholder="Confirm your password"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.confirmPassword}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-                    </form>
-                )}
 
-                {currentStep === 3 && (
-                    <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Education Level</label>
-                                <select
-                                    name="educationLevel"
+                                <label className="block text-textDark font-medium mb-2">Job Responsibilities</label>
+                                <textarea
+                                    name="jobResponsibilities"
+                                    placeholder="Briefly describe your responsibilities or achievements"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.educationLevel || ''}
+                                    rows="4"
+                                    value={formData.jobResponsibilities || ''}
                                     onChange={handleInputChange}
+                                ></textarea>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    className="bg-secondary text-white py-2 px-6 rounded-lg"
+                                    onClick={() => alert('Add more experience functionality coming soon!')}
                                 >
-                                    <option value="" disabled>Select your education level</option>
-                                    <option value="Bachelors">Bachelor’s</option>
-                                    <option value="Masters">Master’s</option>
-                                    <option value="PhD">PhD</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Field of Study</label>
-                                <input
-                                    type="text"
-                                    name="fieldOfStudy"
-                                    placeholder="Enter your field of study"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.fieldOfStudy || ''}
-                                    onChange={handleInputChange}
-                                />
+                                    Add More Experience
+                                </button>
                             </div>
                         </div>
+                    )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {currentStep === 5 && (
+                        <div className="space-y-6">
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Institution Name</label>
+                                <label className="block text-textDark font-medium mb-2">Resume/CV</label>
                                 <input
-                                    type="text"
-                                    name="institutionName"
-                                    placeholder="Enter your institution name"
+                                    type="file"
+                                    name="resume"
+                                    accept=".pdf,.doc,.docx"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.institutionName || ''}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleFileUpload(e, 'resume')}
+                                    required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-textDark font-medium mb-2">Mode of Study</label>
-                                <select
-                                    name="modeOfStudy"
+                                <label className="block text-textDark font-medium mb-2">Profile Picture</label>
+                                <input
+                                    type="file"
+                                    name="profilePicture"
+                                    accept="image/*"
                                     className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.modeOfStudy || ''}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleFileUpload(e, 'profilePicture')}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Academic Certificates</label>
+                                <input
+                                    type="file"
+                                    name="academicCertificates"
+                                    accept=".pdf,.jpg,.png"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    multiple
+                                    onChange={(e) => handleFileUpload(e, 'academicCertificates')}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Government ID Proof</label>
+                                <input
+                                    type="file"
+                                    name="idProof"
+                                    accept=".pdf,.jpg,.png"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    onChange={(e) => handleFileUpload(e, 'idProof')}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-textDark font-medium mb-2">Other Documents</label>
+                                <input
+                                    type="file"
+                                    name="otherDocuments"
+                                    accept=".pdf,.jpg,.png"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                    multiple
+                                    onChange={(e) => handleFileUpload(e, 'otherDocuments')}
+                                />
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    className="bg-primary text-white py-2 px-6 rounded-lg"
+                                    onClick={() => {
+                                        alert('Documents uploaded successfully! Redirecting to login page...');
+                                        navigate('/login');
+                                    }}
                                 >
-                                    <option value="" disabled>Select mode of study</option>
-                                    <option value="Full-time">Full-time</option>
-                                    <option value="Part-time">Part-time</option>
-                                    <option value="Distance Learning">Distance Learning</option>
-                                </select>
+                                    Upload Documents
+                                </button>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Start Date</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.startDate || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
+                    )}
 
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">End Date (or Expected)</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.endDate || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Grade/CGPA (Optional)</label>
-                            <input
-                                type="text"
-                                name="grade"
-                                placeholder="Enter your grade or CGPA"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                value={formData.grade || ''}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                    </form>
-                )}
+                    {error && <p className="text-red-500 mt-4">{error}</p>}
+                    {success && <p className="text-green-500 mt-4">{success}</p>}
 
 
-                {currentStep === 4 && (
-                    <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Job Title/Role</label>
-                                <input
-                                    type="text"
-                                    name="jobTitle"
-                                    placeholder="Enter your job title"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.jobTitle || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Company Name</label>
-                                <input
-                                    type="text"
-                                    name="companyName"
-                                    placeholder="Enter your company name"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.companyName || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Employment Type</label>
-                                <select
-                                    name="employmentType"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.employmentType || ''}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="" disabled>Select employment type</option>
-                                    <option value="Full-time">Full-time</option>
-                                    <option value="Part-time">Part-time</option>
-                                    <option value="Internship">Internship</option>
-                                    <option value="Freelance">Freelance</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Location</label>
-                                <input
-                                    type="text"
-                                    name="location"
-                                    placeholder="City or Remote"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.location || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">Start Date</label>
-                                <input
-                                    type="date"
-                                    name="workStartDate"
-                                    className="w-full p-3 border border-gray-300 rounded-lg"
-                                    value={formData.workStartDate || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-textDark font-medium mb-2">End Date</label>
-                                <input
-                                    type="date"
-                                    name="workEndDate"
-                                    className={`w-full p-3 border border-gray-300 rounded-lg ${formData.currentlyWorking ? 'bg-gray-200 cursor-not-allowed' : ''}`}
-                                    value={formData.workEndDate || ''}
-                                    onChange={handleInputChange}
-                                    disabled={formData.currentlyWorking}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                name="currentlyWorking"
-                                className="h-5 w-5 border border-gray-300 rounded-lg"
-                                checked={formData.currentlyWorking || false}
-                                onChange={handleInputChange}
-                            />
-                            <label className="text-textDark">I am currently working here</label>
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Job Responsibilities</label>
-                            <textarea
-                                name="jobResponsibilities"
-                                placeholder="Briefly describe your responsibilities or achievements"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                rows="4"
-                                value={formData.jobResponsibilities || ''}
-                                onChange={handleInputChange}
-                            ></textarea>
-                        </div>
-
-                        <div className="flex justify-end">
+                    {/* Navigation Buttons */}
+                    <div className="mt-8 flex justify-between">
+                        {currentStep > 1 && (
+                            <button
+                                type='button'
+                                onClick={handlePreviousStep}
+                                className="bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all"
+                            >
+                                Previous
+                            </button>
+                        )}
+                        {currentStep < 5 && (
                             <button
                                 type="button"
-                                className="bg-secondary text-white py-2 px-6 rounded-lg"
-                                onClick={() => alert('Add more experience functionality coming soon!')}
+                                onClick={handleNextStep}
+                                className="bg-primary text-white py-3 px-6 rounded-lg hover:bg-secondary transition-all"
                             >
-                                Add More Experience
+                                Next
                             </button>
-                        </div>
-                    </form>
-                )}
-
-
-                {currentStep === 5 && (
-                    <form className="space-y-6">
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Resume/CV</label>
-                            <input
-                                type="file"
-                                name="resume"
-                                accept=".pdf,.doc,.docx"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                onChange={(e) => handleFileUpload(e, 'resume')}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Profile Picture</label>
-                            <input
-                                type="file"
-                                name="profilePicture"
-                                accept="image/*"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                onChange={(e) => handleFileUpload(e, 'profilePicture')}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Academic Certificates</label>
-                            <input
-                                type="file"
-                                name="academicCertificates"
-                                accept=".pdf,.jpg,.png"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                multiple
-                                onChange={(e) => handleFileUpload(e, 'academicCertificates')}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Government ID Proof</label>
-                            <input
-                                type="file"
-                                name="idProof"
-                                accept=".pdf,.jpg,.png"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                onChange={(e) => handleFileUpload(e, 'idProof')}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-textDark font-medium mb-2">Other Documents</label>
-                            <input
-                                type="file"
-                                name="otherDocuments"
-                                accept=".pdf,.jpg,.png"
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                                multiple
-                                onChange={(e) => handleFileUpload(e, 'otherDocuments')}
-                            />
-                        </div>
-
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                className="bg-primary text-white py-2 px-6 rounded-lg"
-                                onClick={() => {
-                                    alert('Documents uploaded successfully! Redirecting to login page...');
-                                    navigate('/login');
-                                }}
-                            >
-                                Upload Documents
+                        )}
+                        {currentStep === 5 && (
+                            <button type="submit" onClick={handleSubmit} className="bg-primary text-white py-3 px-6 rounded-lg hover:bg-secondary transition-all">
+                                Submit
                             </button>
-                        </div>
-                    </form>
-                )}
-
-
-
-                {/* Navigation Buttons */}
-                <div className="mt-8 flex justify-between">
-                    {currentStep > 1 && (
-                        <button
-                            onClick={handlePreviousStep}
-                            className="bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-all"
-                        >
-                            Previous
-                        </button>
-                    )}
-                    {currentStep < 5 && (
-                        <button
-                            onClick={handleNextStep}
-                            className="bg-primary text-white py-3 px-6 rounded-lg hover:bg-secondary transition-all"
-                        >
-                            Save & Next
-                        </button>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </form>
 
                 {/* Attention Box */}
                 {currentStep === 1 && (
@@ -635,4 +732,3 @@ const StudentSignup = () => {
 };
 
 export default StudentSignup;
-

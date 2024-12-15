@@ -1,48 +1,13 @@
 import React from 'react';
 import { FaHome, FaBriefcase, FaUser, FaClipboardList, FaBook, FaCalendarAlt, FaFileAlt, FaBell, FaQuestionCircle } from 'react-icons/fa';
+import Sidebar from '../components/StudentSidebar';
 
 const StudentDashboard = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <aside className="w-1/4 bg-teal-800 text-white p-6 space-y-6">
-                <h2 className="text-2xl font-bold mb-6">HireHub</h2>
-                <nav className="space-y-4">
-                    <a href="/home" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaHome />
-                        <span>Home</span>
-                    </a>
-                    <a href="/job-profiles" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaBriefcase />
-                        <span>Job Profiles</span>
-                    </a>
-                    <a href="/my-profile" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaUser />
-                        <span>My Profile</span>
-                    </a>
-                    <a href="/interviews" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaClipboardList />
-                        <span>Interviews</span>
-                    </a>
-                    <a href="/assessments" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaBook />
-                        <span>Assessments</span>
-                    </a>
-                    <a href="/events" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaCalendarAlt />
-                        <span>Events</span>
-                    </a>
-                    <a href="/resume" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaFileAlt />
-                        <span>Resume</span>
-                    </a>
-                    <a href="/help" className="flex items-center space-x-3 hover:bg-teal-700 p-2 rounded-lg">
-                        <FaQuestionCircle />
-                        <span>Help</span>
-                    </a>
-                </nav>
-            </aside>
 
+            <Sidebar />
             {/* Main Content */}
             <main className="flex-1 p-6">
                 {/* Header */}
